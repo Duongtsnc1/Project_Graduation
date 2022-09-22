@@ -78,7 +78,7 @@ function Default() {
             />
           </Grid>          
         </Grid>
-        {/* <Grid container spacing={3} mb={3}>
+        <Grid container spacing={3} mb={3}>
           <Grid item xs={5} lg={4}>
             <GradientLineChart
               title="Sales Overview"
@@ -100,7 +100,7 @@ function Default() {
               chart={gradientLineChartData}
             />
           </Grid>          
-        </Grid> */}
+        </Grid>
         {/* <Grid container spacing={3} mb={3}>
           <Grid item xs={5} lg={4}>
             <GradientLineChart
