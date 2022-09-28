@@ -52,7 +52,6 @@ function GradientLineChart({ title, description, height, chart, index }) {
   const chartRef = useRef(null);
   const [chartData, setChartData] = useState({});
   const { data, options } = chartData;
-
   useEffect(() => {
     const chartDatasets = chart.datasets
       ? chart.datasets.map((dataset) => ({
@@ -71,7 +70,6 @@ function GradientLineChart({ title, description, height, chart, index }) {
           ),
         }))
       : [];
-
     setChartData(configs(index));
   }, [chart]);
 
@@ -91,14 +89,9 @@ function GradientLineChart({ title, description, height, chart, index }) {
           </ArgonBox>
         </ArgonBox>
       ) : null}
-      {useMemo(
-        () => (
-          <ArgonBox ref={chartRef} sx={{ height }}>
-            <Line data={data} options={options} />
-          </ArgonBox>
-        ),
-        [chartData, height]
-      )}
+      <ArgonBox ref={chartRef} sx={{ height }}>
+        <Line data={data} options={options} />
+      </ArgonBox>
     </ArgonBox>
   );
 
@@ -109,7 +102,6 @@ function GradientLineChart({ title, description, height, chart, index }) {
 GradientLineChart.defaultProps = {
   title: "",
   description: "",
-
 };
 
 // Typechecking props for the GradientLineChart

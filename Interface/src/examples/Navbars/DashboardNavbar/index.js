@@ -1,40 +1,17 @@
-/**
-=========================================================
-* Argon Dashboard 2 MUI - v3.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-material-ui
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useState, useEffect } from "react";
-
-// react-router components
-import { useLocation, Link } from "react-router-dom";
 
 // prop-types is a library for typechecking of props.
 import PropTypes from "prop-types";
 
 // @mui core components
-import AppBar from "@mui/material/AppBar";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Menu from "@mui/material/Menu";
-import Icon from "@mui/material/Icon";
+import { AppBar, Toolbar, IconButton, Popover, Menu, Icon, Checkbox } from "@mui/material";
+import { KeyboardArrowDown, KeyboardArrowUp } from "@mui/icons-material";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
-import ArgonInput from "components/ArgonInput";
 
 // Argon Dashboard 2 MUI example components
-import Breadcrumbs from "examples/Breadcrumbs";
 import NotificationItem from "examples/Items/NotificationItem";
 
 // Custom styles for DashboardNavbar
@@ -58,13 +35,30 @@ import {
 // Images
 import team2 from "assets/images/team-2.jpg";
 import logoSpotify from "assets/images/small-logos/logo-spotify.svg";
+import ArgonButton from "components/ArgonButton";
 
-function DashboardNavbar({ absolute, light, isMini }) {
+function DashboardNavbar({ absolute, light, isMini, sensors, onChangeFilter }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useArgonController();
-  const { miniSidenav, transparentNavbar, fixedNavbar, openConfigurator } = controller;
+  const { miniSidenav, transparentNavbar, fixedNavbar } = controller;
   const [openMenu, setOpenMenu] = useState(false);
-  const route = useLocation().pathname.split("/").slice(1);
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClickFilter = (event) => {
+    setAnchorEl(anchorEl ? null : event.currentTarget);
+  };
+
+  const handleCloseFilter = () => {
+    setAnchorEl(null);
+  };
+
+  const handleCheck = (key) => {
+    let tempChecked = [...sensors];
+    if (tempChecked.filter((item) => item.show).length === 1) return;
+    let index = tempChecked.findIndex((item) => item.title === key);
+    tempChecked[index].show = !tempChecked[index].show;
+    onChangeFilter(tempChecked);
+  };
 
   useEffect(() => {
     // Setting the navbar type
@@ -73,27 +67,9 @@ function DashboardNavbar({ absolute, light, isMini }) {
     } else {
       setNavbarType("static");
     }
-
-    // A function that sets the transparent state of the navbar.
-    function handleTransparentNavbar() {
-      setTransparentNavbar(dispatch, (fixedNavbar && window.scrollY === 0) || !fixedNavbar);
-    }
-
-    /** 
-     The event listener that's calling the handleTransparentNavbar function when 
-     scrolling the window.
-    */
-    window.addEventListener("scroll", handleTransparentNavbar);
-
-    // Call the handleTransparentNavbar function to set the state with the initial value.
-    handleTransparentNavbar();
-
-    // Remove event listener on cleanup
-    return () => window.removeEventListener("scroll", handleTransparentNavbar);
   }, [dispatch, fixedNavbar]);
 
   const handleMiniSidenav = () => setMiniSidenav(dispatch, !miniSidenav);
-  const handleConfiguratorOpen = () => setOpenConfigurator(dispatch, !openConfigurator);
   const handleOpenMenu = (event) => setOpenMenu(event.currentTarget);
   const handleCloseMenu = () => setOpenMenu(false);
 
@@ -135,7 +111,6 @@ function DashboardNavbar({ absolute, light, isMini }) {
       />
     </Menu>
   );
-
   return (
     <AppBar
       position={absolute ? "absolute" : navbarType}
@@ -147,79 +122,95 @@ function DashboardNavbar({ absolute, light, isMini }) {
           color={light && transparentNavbar ? "white" : "dark"}
           mb={{ xs: 1, md: 0 }}
           sx={(theme) => navbarRow(theme, { isMini })}
-        >
-          <Breadcrumbs
-            icon="home"
-            title={route[route.length - 1]}
-            route={route}
-            light={transparentNavbar ? light : false}
-          />
-          <Icon fontSize="medium" sx={navbarDesktopMenu} onClick={handleMiniSidenav}>
-            {miniSidenav ? "menu_open" : "menu"}
-          </Icon>
-        </ArgonBox>
-        {isMini ? null : (
-          <ArgonBox sx={(theme) => navbarRow(theme, { isMini })}>
-            <ArgonBox pr={1}>
-              <ArgonInput
-                placeholder="Type here..."
-                startAdornment={
-                  <Icon fontSize="small" style={{ marginRight: "6px" }}>
-                    search
-                  </Icon>
-                }
-              />
-            </ArgonBox>
-            <ArgonBox color={light ? "white" : "inherit"}>
-              <Link to="/authentication/sign-in/basic">
-                <IconButton sx={navbarIconButton} size="small">
-                  <Icon
-                    sx={({ palette: { dark, white } }) => ({
-                      color: light && transparentNavbar ? white.main : dark.main,
-                    })}
-                  >
-                    account_circle
-                  </Icon>
-                  <ArgonTypography
-                    variant="button"
-                    fontWeight="medium"
-                    color={light && transparentNavbar ? "white" : "dark"}
-                  >
-                    Sign in
-                  </ArgonTypography>
-                </IconButton>
-              </Link>
-              <IconButton
-                size="small"
-                color={light && transparentNavbar ? "white" : "dark"}
-                sx={navbarMobileMenu}
-                onClick={handleMiniSidenav}
+        ></ArgonBox>
+        <ArgonBox sx={(theme) => navbarRow(theme, { isMini })}>
+          <ArgonBox pr={1}>
+            <ArgonButton variant="text" onClick={handleClickFilter}>
+              Show/Hide sensor {Boolean(anchorEl) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
+            </ArgonButton>
+            <Popover
+              id="simple-popper"
+              open={Boolean(anchorEl)}
+              onClose={handleCloseFilter}
+              anchorEl={anchorEl}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              PaperProps={{
+                style: {
+                  padding: "10px",
+
+                  boxShadow: "5px 5px 10px #000",
+                  backgroundColor: "#fff",
+                },
+              }}
+              disableAutoFocus
+              disableRestoreFocus
+            >
+              <div
+                style={{
+                  color: "#11cdef",
+                  padding: "5px",
+                  maxHeight: "400px",
+                  overflowY: "scroll",
+                }}
               >
-                <Icon>{miniSidenav ? "menu_open" : "menu"}</Icon>
-              </IconButton>
-              <IconButton
-                size="small"
-                color={light && transparentNavbar ? "white" : "dark"}
-                sx={navbarIconButton}
-                onClick={handleConfiguratorOpen}
-              >
-                <Icon>settings</Icon>
-              </IconButton>
-              <IconButton
-                size="small"
-                color={light && transparentNavbar ? "white" : "dark"}
-                sx={navbarIconButton}
-                aria-controls="notification-menu"
-                aria-haspopup="true"
-                variant="contained"
-                onClick={handleOpenMenu}
-              >
-                <Icon>notifications</Icon>
-              </IconButton>
-              {renderMenu()}
-            </ArgonBox>
+                <div>
+                  {sensors.map((value, index) => (
+                    <div key={index}>
+                      <Checkbox checked={value.show} onClick={() => handleCheck(value.title)} />
+                      {value.title}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Popover>
           </ArgonBox>
-        )}
+          <ArgonBox color={light ? "white" : "inherit"}>
+            <IconButton sx={navbarIconButton} size="small">
+              <Icon
+                sx={({ palette: { dark, white } }) => ({
+                  color: light && transparentNavbar ? white.main : dark.main,
+                })}
+              >
+                account_circle
+              </Icon>
+              <ArgonTypography
+                variant="button"
+                fontWeight="medium"
+                color={light && transparentNavbar ? "white" : "dark"}
+              >
+                Administrator
+              </ArgonTypography>
+            </IconButton>
+
+            <IconButton
+              size="small"
+              color={light && transparentNavbar ? "white" : "dark"}
+              sx={navbarMobileMenu}
+              onClick={handleMiniSidenav}
+            >
+              <Icon>{miniSidenav ? "menu_open" : "menu"}</Icon>
+            </IconButton>
+            <IconButton
+              size="small"
+              color={light && transparentNavbar ? "white" : "dark"}
+              sx={navbarIconButton}
+              aria-controls="notification-menu"
+              aria-haspopup="true"
+              variant="contained"
+              onClick={handleOpenMenu}
+            >
+              <Icon>notifications</Icon>
+            </IconButton>
+            {renderMenu()}
+          </ArgonBox>
+        </ArgonBox>
       </Toolbar>
     </AppBar>
   );
@@ -237,6 +228,8 @@ DashboardNavbar.propTypes = {
   absolute: PropTypes.bool,
   light: PropTypes.bool,
   isMini: PropTypes.bool,
+  onChangeFilter: PropTypes.any,
+  sensors: PropTypes.any,
 };
 
 export default DashboardNavbar;

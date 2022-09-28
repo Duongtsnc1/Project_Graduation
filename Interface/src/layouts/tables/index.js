@@ -36,7 +36,7 @@ function Tables() {
 
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      {/* <DashboardNavbar /> */}
       <ArgonBox py={3}>
         <ArgonBox mb={3}>
           <Card>

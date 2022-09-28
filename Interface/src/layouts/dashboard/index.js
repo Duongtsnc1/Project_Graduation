@@ -1,163 +1,116 @@
-/* eslint-disable no-unused-vars */
-/**
-=========================================================
-* Argon Dashboard 2 MUI - v3.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-material-ui
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 // @mui material components
 import Grid from "@mui/material/Grid";
-import Icon from "@mui/material/Icon";
+import { PaginationItem, Pagination } from "@mui/material";
+import { makeStyles } from "@material-ui/core/styles";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
-import ArgonTypography from "components/ArgonTypography";
 
 // Argon Dashboard 2 MUI example components
 import DashboardLayout from "examples/LayoutContainers/DashboardLayout";
 import DashboardNavbar from "examples/Navbars/DashboardNavbar";
 import Footer from "examples/Footer";
-import DetailedStatisticsCard from "examples/Cards/StatisticsCards/DetailedStatisticsCard";
 import SalesTable from "examples/Tables/SalesTable";
 import CategoriesList from "examples/Lists/CategoriesList";
 import GradientLineChart from "examples/Charts/LineCharts/GradientLineChart";
-
-// Argon Dashboard 2 MUI base styles
-import typography from "assets/theme/base/typography";
-
-// Dashboard layout components
-import Slider from "layouts/dashboard/components/Slider";
 
 // Data
 import gradientLineChartData from "layouts/dashboard/data/gradientLineChartData";
 import salesTableData from "layouts/dashboard/data/salesTableData";
 import categoriesListData from "layouts/dashboard/data/categoriesListData";
-import axios from "axios";
-import {useEffect,useState} from 'react'
+import sensorDatas from "layouts/dashboard/data/sensorDatas";
+
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+
 function Default() {
-  const { size } = typography;  
-  // const renderChart=()=>{
-  //   const result=<></>;
-  //   let numChart = 12;
-  //   while()
-  // }
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [sensors, setSensors] = useState(
+    window.localStorage.getItem(sensorDatas.sensorDatas)
+      ? JSON.parse(window.localStorage.getItem(sensorDatas.sensorDatas))
+      : sensorDatas.sensors
+  );
+  const count = Math.ceil(sensors.filter((item) => item.show).length / 8);
+
+  useEffect(() => {
+    (id > count || id <= 0) && navigate("/dashboard/1");
+  }, []);
+
+  const renderCharSensors = () => {
+    let i = 4 * (id - 1) * 2;
+    let showSensors = sensors.filter((item) => item.show);
+    let result = [];
+    let temp = [];
+    while (i < 4 * id * 2 && i < showSensors.length) {
+      temp.push(
+        <Grid key={showSensors[i].title} item xs={5} lg={3}>
+          <GradientLineChart title={showSensors[i].title} index={i} chart={gradientLineChartData} />
+        </Grid>
+      );
+      if ((i + 1) % 4 === 0 || i + 1 >= showSensors.length) {
+        result.push(
+          <Grid key={i} container spacing={3} mb={3}>
+            {temp}
+          </Grid>
+        );
+        temp = [];
+      }
+      i++;
+    }
+    if (result.length === 0) navigate("/dashboard" + (id - 1));
+    return result;
+  };
+
+  const handlePageChange = (event, value) => {
+    if (value !== Number(id)) {
+      navigate("/dashboard/" + value);
+      window.scrollTo(0, 0);
+    }
+  };
+
+  const useStyles = makeStyles((theme) => ({
+    selected: {
+      backgroundColor: "green",
+      color: "red",
+    },
+  }));
+  // .... rest of code
+  const classes = useStyles();
   return (
     <DashboardLayout>
-      <DashboardNavbar />
+      <DashboardNavbar sensors={sensors} onChangeFilter={setSensors} />
       <ArgonBox py={3}>
-        
-        <Grid container spacing={3} mb={3}>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              index={1}
-              chart={gradientLineChartData}
+        {renderCharSensors()}
+        <Grid alignItems="center" justifyContent="center" container spacing={3} mb={3}>
+          <ArgonBox mt={3} px={0.8} sx={{ padding: "5px" }}>
+            <Pagination
+              count={count}
+              variant="outlined"
+              color="primary"
+              size="small"
+              shape="rounded"
+              showFirstButton={count >= 8}
+              showLastButton={count >= 8}
+              page={id ? Number(id) : 1}
+              siblingCount={1}
+              boundaryCount={1}
+              renderItem={(item) => {
+                return <PaginationItem {...item} />;
+              }}
+              onChange={handlePageChange}
+              value={id}
             />
-          </Grid>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              index={2}
-              chart={gradientLineChartData}
-            />
-          </Grid>
-           <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              index={3}
-              chart={gradientLineChartData}
-            />
-          </Grid>          
+          </ArgonBox>
         </Grid>
-        <Grid container spacing={3} mb={3}>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              index={4}
-              chart={gradientLineChartData}
-            />
-          </Grid>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              index={5}
-              chart={gradientLineChartData}
-            />
-          </Grid>
-           <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              index={6}
-              chart={gradientLineChartData}
-            />
-          </Grid>          
-        </Grid>
-        {/* <Grid container spacing={3} mb={3}>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              
-              chart={gradientLineChartData}
-            />
-          </Grid>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              
-              chart={gradientLineChartData}
-            />
-          </Grid>
-           <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              
-              chart={gradientLineChartData}
-            />
-          </Grid>          
-        </Grid>
-        <Grid container spacing={3} mb={3}>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              
-              chart={gradientLineChartData}
-            />
-          </Grid>
-          <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              
-              chart={gradientLineChartData}
-            />
-          </Grid>
-           <Grid item xs={5} lg={4}>
-            <GradientLineChart
-              title="Sales Overview"
-              
-              chart={gradientLineChartData}
-            />
-          </Grid>          
-        </Grid> */}
-       
         <Grid container spacing={3}>
-          <Grid item xs={12} md={8}>
-            <SalesTable title="Sales by Country" rows={salesTableData} />
+          <Grid item xs={12} md={12}>
+            <SalesTable title="Anomaly logs" rows={salesTableData} />
           </Grid>
-          <Grid item xs={12} md={4}>
-            <CategoriesList title="categories" categories={categoriesListData} />
-          </Grid>
+         
         </Grid>
-      </ArgonBox> 
-      
+      </ArgonBox>
+
       <Footer />
     </DashboardLayout>
   );

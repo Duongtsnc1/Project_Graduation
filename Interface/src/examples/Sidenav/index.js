@@ -70,52 +70,54 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   }, [dispatch, location]);
 
   // Render all the routes from the routes.js (All the visible items on the Sidenav)
-  const renderRoutes = routes.map(({ type, name, icon, title, key, href, route }) => {
-    let returnValue;
+  const renderRoutes = routes.map(
+    ({ type, name, icon, title, key, href, route, params, defaultParam, mainRoute }) => {
+      let returnValue;
 
-    if (type === "route") {
-      if (href) {
+      if (type === "route") {
+        if (href) {
+          returnValue = (
+            <Link href={href} key={key} target="_blank" rel="noreferrer">
+              <SidenavItem
+                name={name}
+                icon={icon}
+                active={key === itemName}
+                noCollapse={noCollapse}
+              />
+            </Link>
+          );
+        } else {
+          returnValue = (
+            <NavLink to={params ? mainRoute + "/" + defaultParam : route} key={key}>
+              <SidenavItem name={name} icon={icon} active={key === itemName} />
+            </NavLink>
+          );
+        }
+      } else if (type === "title") {
         returnValue = (
-          <Link href={href} key={key} target="_blank" rel="noreferrer">
-            <SidenavItem
-              name={name}
-              icon={icon}
-              active={key === itemName}
-              noCollapse={noCollapse}
-            />
-          </Link>
+          <ArgonTypography
+            key={key}
+            color={darkSidenav ? "white" : "dark"}
+            display="block"
+            variant="caption"
+            fontWeight="bold"
+            textTransform="uppercase"
+            opacity={0.6}
+            pl={3}
+            mt={2}
+            mb={1}
+            ml={1}
+          >
+            {title}
+          </ArgonTypography>
         );
-      } else {
-        returnValue = (
-          <NavLink to={route} key={key}>
-            <SidenavItem name={name} icon={icon} active={key === itemName} />
-          </NavLink>
-        );
+      } else if (type === "divider") {
+        returnValue = <Divider key={key} light={darkSidenav} />;
       }
-    } else if (type === "title") {
-      returnValue = (
-        <ArgonTypography
-          key={key}
-          color={darkSidenav ? "white" : "dark"}
-          display="block"
-          variant="caption"
-          fontWeight="bold"
-          textTransform="uppercase"
-          opacity={0.6}
-          pl={3}
-          mt={2}
-          mb={1}
-          ml={1}
-        >
-          {title}
-        </ArgonTypography>
-      );
-    } else if (type === "divider") {
-      returnValue = <Divider key={key} light={darkSidenav} />;
-    }
 
-    return returnValue;
-  });
+      return returnValue;
+    }
+  );
 
   return (
     <SidenavRoot {...rest} variant="permanent" ownerState={{ darkSidenav, miniSidenav, layout }}>

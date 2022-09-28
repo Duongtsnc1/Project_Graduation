@@ -146,14 +146,14 @@ export default function App() {
         <CssBaseline />
         {layout === "dashboard" && (
           <>
-            <Sidenav
+            {/* <Sidenav
               color={sidenavColor}
               brand={darkSidenav || darkMode ? brand : brandDark}
               brandName="Argon Dashboard 2 PRO"
               routes={routes}
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
-            />
+            /> */}
             <Configurator />
             {configsButton}
           </>
@@ -161,7 +161,7 @@ export default function App() {
         {layout === "vr" && <Configurator />}
         <Routes>
           {getRoutes(routes)}
-          <Route path="*" element={<Navigate to="/dashboard" />} />
+          <Route path="*" element={<Navigate to="/dashboard/1" />} />
         </Routes>
       </ThemeProvider>
     </CacheProvider>
@@ -170,14 +170,14 @@ export default function App() {
       <CssBaseline />
       {layout === "dashboard" && (
         <>
-          <Sidenav
+          {/* <Sidenav
             color={sidenavColor}
             brand={darkSidenav || darkMode ? brand : brandDark}
             brandName="Argon Dashboard 2 PRO"
             routes={routes}
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
-          />
+          /> */}
           <Configurator />
           {configsButton}
         </>
@@ -185,7 +185,7 @@ export default function App() {
       {layout === "vr" && <Configurator />}
       <Routes>
         {getRoutes(routes)}
-        <Route path="*" element={<Navigate to="/dashboard" />} />
+        <Route path="*" element={<Navigate to="/dashboard/1" />} />
       </Routes>
     </ThemeProvider>
   );
