@@ -37,28 +37,11 @@ import team2 from "assets/images/team-2.jpg";
 import logoSpotify from "assets/images/small-logos/logo-spotify.svg";
 import ArgonButton from "components/ArgonButton";
 
-function DashboardNavbar({ absolute, light, isMini, sensors, onChangeFilter }) {
+function DashboardNavbar({ absolute, light, isMini }) {
   const [navbarType, setNavbarType] = useState();
   const [controller, dispatch] = useArgonController();
   const { miniSidenav, transparentNavbar, fixedNavbar } = controller;
   const [openMenu, setOpenMenu] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
-
-  const handleClickFilter = (event) => {
-    setAnchorEl(anchorEl ? null : event.currentTarget);
-  };
-
-  const handleCloseFilter = () => {
-    setAnchorEl(null);
-  };
-
-  const handleCheck = (key) => {
-    let tempChecked = [...sensors];
-    if (tempChecked.filter((item) => item.show).length === 1) return;
-    let index = tempChecked.findIndex((item) => item.title === key);
-    tempChecked[index].show = !tempChecked[index].show;
-    onChangeFilter(tempChecked);
-  };
 
   useEffect(() => {
     // Setting the navbar type
@@ -124,53 +107,6 @@ function DashboardNavbar({ absolute, light, isMini, sensors, onChangeFilter }) {
           sx={(theme) => navbarRow(theme, { isMini })}
         ></ArgonBox>
         <ArgonBox sx={(theme) => navbarRow(theme, { isMini })}>
-          <ArgonBox pr={1}>
-            <ArgonButton variant="text" onClick={handleClickFilter}>
-              Show/Hide sensor {Boolean(anchorEl) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
-            </ArgonButton>
-            <Popover
-              id="simple-popper"
-              open={Boolean(anchorEl)}
-              onClose={handleCloseFilter}
-              anchorEl={anchorEl}
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "right",
-              }}
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              PaperProps={{
-                style: {
-                  padding: "10px",
-
-                  boxShadow: "5px 5px 10px #000",
-                  backgroundColor: "#fff",
-                },
-              }}
-              disableAutoFocus
-              disableRestoreFocus
-            >
-              <div
-                style={{
-                  color: "#11cdef",
-                  padding: "5px",
-                  maxHeight: "400px",
-                  overflowY: "scroll",
-                }}
-              >
-                <div>
-                  {sensors.map((value, index) => (
-                    <div key={index}>
-                      <Checkbox checked={value.show} onClick={() => handleCheck(value.title)} />
-                      {value.title}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </Popover>
-          </ArgonBox>
           <ArgonBox color={light ? "white" : "inherit"}>
             <IconButton sx={navbarIconButton} size="small">
               <Icon
@@ -228,8 +164,6 @@ DashboardNavbar.propTypes = {
   absolute: PropTypes.bool,
   light: PropTypes.bool,
   isMini: PropTypes.bool,
-  onChangeFilter: PropTypes.any,
-  sensors: PropTypes.any,
 };
 
 export default DashboardNavbar;

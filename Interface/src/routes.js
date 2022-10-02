@@ -39,6 +39,7 @@ import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
+import Mylayout from "layouts/Mylayout";
 
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
@@ -49,11 +50,18 @@ const routes = [
     name: "Dashboard",
     key: "dashboard",
     route: "/dashboard/:id",
-    mainRoute:"/dashboard",
+    mainRoute: "/dashboard",
     icon: <ArgonBox component="i" color="primary" fontSize="14px" className="ni ni-tv-2" />,
     component: <Dashboard />,
     params: true,
-    defaultParam:1
+    defaultParam: 1,
+  },
+  {
+    type: "route",
+    name: "Mylayour",
+    key: "dashboard",
+    route:"/mylayout",
+    component: <Mylayout/>
   },
   {
     type: "route",
@@ -89,7 +97,6 @@ const routes = [
     icon: <ArgonBox component="i" color="error" fontSize="14px" className="ni ni-world-2" />,
     component: <RTL />,
   },
-  
 ];
 
 export default routes;

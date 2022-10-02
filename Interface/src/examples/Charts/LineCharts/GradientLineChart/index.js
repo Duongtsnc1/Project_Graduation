@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useMemo } from "react";
+import React, { useRef, useEffect, useState } from "react";
 
 // porp-types is a library for typechecking of props
 import PropTypes from "prop-types";
@@ -39,40 +39,15 @@ import Card from "@mui/material/Card";
 import ArgonBox from "components/ArgonBox";
 import ArgonTypography from "components/ArgonTypography";
 
-// Argon Dashboard 2 MUI helper functions
-import gradientChartLine from "assets/theme/functions/gradientChartLine";
-
 // GradientLineChart configurations
 import configs from "examples/Charts/LineCharts/GradientLineChart/configs";
 
-// Argon Dashboard 2 MUI base styles
-import colors from "assets/theme/base/colors";
-
-function GradientLineChart({ title, description, height, chart, index }) {
-  const chartRef = useRef(null);
+const GradientLineChart = React.forwardRef(({ title, description, height, lineHeight }, ref) => {
   const [chartData, setChartData] = useState({});
   const { data, options } = chartData;
   useEffect(() => {
-    const chartDatasets = chart.datasets
-      ? chart.datasets.map((dataset) => ({
-          ...dataset,
-          tension: 0.4,
-          pointRadius: 0,
-          borderWidth: 3,
-          borderColor: colors[dataset.color]
-            ? colors[dataset.color || "dark"].main
-            : colors.dark.main,
-          fill: true,
-          maxBarThickness: 6,
-          backgroundColor: gradientChartLine(
-            chartRef.current.children[0],
-            colors[dataset.color] ? colors[dataset.color || "dark"].main : colors.dark.main
-          ),
-        }))
-      : [];
-    setChartData(configs(index));
-  }, [chart]);
-
+    setChartData(configs());
+  }, []);
   const renderChart = (
     <ArgonBox p={2}>
       {title || description ? (
@@ -89,14 +64,14 @@ function GradientLineChart({ title, description, height, chart, index }) {
           </ArgonBox>
         </ArgonBox>
       ) : null}
-      <ArgonBox ref={chartRef} sx={{ height }}>
-        <Line data={data} options={options} />
+      <ArgonBox sx={{ height }}>
+        <Line data={data} for ref={ref} height={lineHeight} options={options} />
       </ArgonBox>
     </ArgonBox>
   );
 
   return title || description ? <Card>{renderChart}</Card> : renderChart;
-}
+});
 
 // Setting default values for the props of GradientLineChart
 GradientLineChart.defaultProps = {
@@ -109,8 +84,9 @@ GradientLineChart.propTypes = {
   title: PropTypes.string,
   description: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  chart: PropTypes.objectOf(PropTypes.array).isRequired,
   index: PropTypes.any,
+  lineHeight: PropTypes.any,
+  newData: PropTypes.any,
 };
 
 export default GradientLineChart;
