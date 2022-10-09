@@ -39,8 +39,7 @@ import Tables from "layouts/tables";
 import Billing from "layouts/billing";
 import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
-import Mylayout from "layouts/Mylayout";
-
+import DataDetail from "layouts/dataDetail";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 
@@ -58,10 +57,13 @@ const routes = [
   },
   {
     type: "route",
-    name: "Mylayour",
-    key: "dashboard",
-    route:"/mylayout",
-    component: <Mylayout/>
+    name: "DataDetail",
+    key: "datadetail",
+    route: "/datadetail",
+    icon: (
+      <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
+    ),
+    component: <DataDetail />,
   },
   {
     type: "route",

@@ -42,41 +42,44 @@ import ArgonTypography from "components/ArgonTypography";
 // GradientLineChart configurations
 import configs from "examples/Charts/LineCharts/GradientLineChart/configs";
 
-const GradientLineChart = React.forwardRef(({ title, description, height, lineHeight }, ref) => {
-  const [chartData, setChartData] = useState({});
-  const { data, options } = chartData;
-  useEffect(() => {
-    setChartData(configs());
-  }, []);
-  const renderChart = (
-    <ArgonBox p={2}>
-      {title || description ? (
-        <ArgonBox px={description ? 1 : 0} pt={description ? 1 : 0}>
-          {title && (
-            <ArgonBox mb={1}>
-              <ArgonTypography variant="h6">{title}</ArgonTypography>
+const GradientLineChart = React.forwardRef(
+  ({ title, description, height, lineHeight, type }, ref) => {
+    const [chartData, setChartData] = useState({});
+    const { data, options } = chartData;
+    useEffect(() => {
+      setChartData(configs(type));
+    }, []);
+    const renderChart = (
+      <ArgonBox p={2}>
+        {title || description ? (
+          <ArgonBox px={description ? 1 : 0} pt={description ? 1 : 0}>
+            {title && (
+              <ArgonBox mb={1}>
+                <ArgonTypography variant="h6">{title}</ArgonTypography>
+              </ArgonBox>
+            )}
+            <ArgonBox mb={2}>
+              <ArgonTypography component="div" variant="button" fontWeight="regular" color="text">
+                {description}
+              </ArgonTypography>
             </ArgonBox>
-          )}
-          <ArgonBox mb={2}>
-            <ArgonTypography component="div" variant="button" fontWeight="regular" color="text">
-              {description}
-            </ArgonTypography>
           </ArgonBox>
+        ) : null}
+        <ArgonBox sx={{ height }}>
+          <Line data={data} for ref={ref} height={lineHeight} options={options} />
         </ArgonBox>
-      ) : null}
-      <ArgonBox sx={{ height }}>
-        <Line data={data} for ref={ref} height={lineHeight} options={options} />
       </ArgonBox>
-    </ArgonBox>
-  );
+    );
 
-  return title || description ? <Card>{renderChart}</Card> : renderChart;
-});
+    return title || description ? <Card>{renderChart}</Card> : renderChart;
+  }
+);
 
 // Setting default values for the props of GradientLineChart
 GradientLineChart.defaultProps = {
   title: "",
   description: "",
+  type: "sensor",
 };
 
 // Typechecking props for the GradientLineChart
@@ -84,9 +87,10 @@ GradientLineChart.propTypes = {
   title: PropTypes.string,
   description: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  index: PropTypes.any,
   lineHeight: PropTypes.any,
   newData: PropTypes.any,
+  type: PropTypes.any,
+  // threshold: PropTypes.any,
 };
 
 export default GradientLineChart;

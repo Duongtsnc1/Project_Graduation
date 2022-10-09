@@ -105,7 +105,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
           color={light && transparentNavbar ? "white" : "dark"}
           mb={{ xs: 1, md: 0 }}
           sx={(theme) => navbarRow(theme, { isMini })}
-        ></ArgonBox>
+        >DASHBOARD </ArgonBox>
         <ArgonBox sx={(theme) => navbarRow(theme, { isMini })}>
           <ArgonBox color={light ? "white" : "inherit"}>
             <IconButton sx={navbarIconButton} size="small">

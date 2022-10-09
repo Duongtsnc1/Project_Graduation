@@ -13,7 +13,6 @@ import SalesTable from "examples/Tables/SalesTable";
 import GradientLineChart from "examples/Charts/LineCharts/GradientLineChart";
 
 // Data
-import gradientLineChartData from "layouts/dashboard/data/gradientLineChartData";
 import salesTableData from "layouts/dashboard/data/salesTableData";
 import sensorDatas from "layouts/dashboard/data/sensorDatas";
 
@@ -21,42 +20,137 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import useWebSocket from "react-use-websocket";
 import FilterSensors from "./components/FilterSensors.js";
+import ArgonButton from "components/ArgonButton/index.js";
+import { render } from "@testing-library/react";
 
 function Default() {
-  const { id } = useParams();
+  const [id, setId] = useState(1);
   const navigate = useNavigate();
   const [sensors, setSensors] = useState(sensorDatas.sensors);
+  const [mode, setMode] = useState(true);
+  const [rawData, setRawData] = useState([]);
+  const [scaledData, setScaledData] = useState([]);
 
-  const count = Math.ceil(sensors.filter((item) => item.show).length / 8);
-  const arrayRef = Array.from({ length: 60 }, () => useRef(null));
-  // const [data, setData] = useState({ array: [], error: 0, anomaly: false });
-  // const [error, setError] = useState([]);
+  const count = useMemo(
+    () => Math.ceil(sensors.filter((item) => item.show).length / 8),
+    [sensors, id]
+  );
+  const sensorRef = Array.from({ length: 59 }, () => useRef(null));
+  const errorRef = useRef(null);
+  const [threshold, setThreshold] = useState(0);
+
+  const getLastpoint = useCallback((oldArray, newValue, maxPoint = 80) => {
+    oldArray.length >= maxPoint && oldArray.shift();
+    return [...oldArray, newValue];
+  }, []);
+
+  const resetSensor = () => {
+    sensorRef.map((sensor) => {
+      if (sensor.current) {
+        sensor.current.data.datasets[0].data = [];
+        sensor.current.data.datasets[1].data = [];
+        sensor.current.update();
+      }
+    });
+  };
+
+  const updateSensor = () => {
+    sensorRef.map((sensor) => {
+      if (sensor.current) sensor.current.update();
+    });
+  };
+
+  const insertData = () => {
+    if (mode) {
+      scaledData.map((value) => {
+        value.point_scaled.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+        });
+        value.point_predicted.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
+        });
+      });
+    } else {
+      rawData.map((value) => {
+        value.data.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+        });
+        value.predicted_data.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
+        });
+      });
+    }
+  };
+  const renderData = () => {
+    console.log("renderData");
+    resetSensor();
+    insertData();
+    updateSensor();
+  };
+
+  // const { sendJsonMessage, getWebSocket } = useWebSocket("ws://192.168.202.23:8011/", {
   const { sendJsonMessage, getWebSocket } = useWebSocket("ws://127.0.0.1:8888/", {
     onOpen: () => console.log("WebSocket connection opened."),
     onClose: () => console.log("WebSocket connection closed."),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
-      const data = JSON.parse(event.data);
-      const { array, error, anomaly } = data;
-      [...array, error].map((value, index) => {
-        if (arrayRef[index].current) {
-          arrayRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: value });
-          arrayRef[index].current.data.datasets[0].pointBackgroundColor.push(
-            anomaly ? "#ff3333" : "#3d15b0"
-          );
-          arrayRef[index].current.data.datasets[0].pointBorderColor.push(
-            anomaly ? "#ff3333" : "#3d15b0"
-          );
-          arrayRef[index].current.data.datasets[0].pointRadius.push(anomaly ? 3 : 2);
-          arrayRef[index].current.update();
-        }
-      });
+      const dataSocket = JSON.parse(event.data);
+      const { data, datetime, label, predict = {}, predicted_data } = dataSocket[0];
+
+      let {
+        anomaly = false,
+        point_scaled = null,
+        point_predicted = null,
+        score_error = null,
+        threshold = 0,
+      } = predict;
+
+      let newData = getLastpoint([...rawData], { data, predicted_data, time: Date.now() }, 80);
+      setRawData(newData);
+      if (point_predicted) {
+        let newData = getLastpoint(
+          [...scaledData],
+          { point_scaled, point_predicted, time: Date.now() },
+          80
+        );
+        setScaledData(newData);
+      }
+
+      if (mode) {
+        point_scaled.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
+        });
+        point_predicted.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[1].data.push({ x: Date.now(), y: item });
+        });
+      } else {
+        data.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
+        });
+        predicted_data.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[1].data.push({ x: Date.now(), y: item });
+        });
+      }
+
+      if (errorRef.current && score_error) {
+        errorRef.current.data.datasets[0].data.push({ x: Date.now(), y: score_error });
+        errorRef.current.data.datasets[0].pointRadius.push(anomaly ? 2 : 1);
+        errorRef.current.data.datasets[0].pointBackgroundColor.push(
+          anomaly ? "#ff3333" : "#3d15b0"
+        );
+        errorRef.current.data.datasets[0].pointBorderColor.push(anomaly ? "#ff3333" : "#3d15b0");
+        errorRef.current.update();
+      }
     },
   });
-
-  useEffect(() => {
-    (id > count || id <= 0) && navigate("/dashboard/1");
-  }, []);
 
   const renderCharSensors = useMemo(() => {
     let i = 4 * (id - 1) * 2;
@@ -66,7 +160,7 @@ function Default() {
     while (i < 4 * id * 2 && i < showSensors.length) {
       temp.push(
         <Grid key={showSensors[i].title} item xs={5} lg={3}>
-          <GradientLineChart title={showSensors[i].title} index={i} ref={arrayRef[i]} />
+          <GradientLineChart title={showSensors[i].title} ref={sensorRef[i]} />
         </Grid>
       );
       if ((i + 1) % 4 === 0 || i + 1 >= showSensors.length) {
@@ -85,15 +179,20 @@ function Default() {
 
   const handlePageChange = (event, value) => {
     if (value !== Number(id)) {
-      navigate("/dashboard/" + value);
-      window.scrollTo(0, 1000);
+      renderData();
+      setId(Number(id));
     }
   };
 
+  // console.log("Rerender Dashboard", Date.now())F
+
+  const hanldeChangeMode = () => {
+    renderData();
+    setMode(!mode);
+  };
   return (
     <DashboardLayout>
       <DashboardNavbar />
-
       <ArgonBox py={3}>
         {useMemo(
           () => (
@@ -102,16 +201,40 @@ function Default() {
                 <GradientLineChart
                   title="error"
                   index={2}
-                  chart={gradientLineChartData}
                   lineHeight={"40%"}
-                  ref={arrayRef[59]}
+                  ref={errorRef}
+                  type="error"
+                  // threshold={threshold}
                 />
               </Grid>
             </Grid>
           ),
           [id, sensors]
         )}
-        <FilterSensors sensors={sensors} onChangeFilter={setSensors} />
+
+        <Grid display="flex" alignItems="center" justifyContent={"space-between"} mb={3}>
+          <ArgonBox spacing={1}>
+            <ArgonBox pr={1}>
+              <ArgonButton
+                color="primary"
+                variant="gradient"
+                size="small"
+                onClick={hanldeChangeMode}
+              >
+                {`Switch to ${mode ? "Raw data" : "Scaled data"}`}
+              </ArgonButton>
+            </ArgonBox>
+          </ArgonBox>
+          {useMemo(
+            () => (
+              <ArgonBox spacing={3}>
+                <FilterSensors sensors={sensors} onChangeFilter={setSensors} />
+              </ArgonBox>
+            ),
+            [sensors, mode]
+          )}
+        </Grid>
+
         {renderCharSensors}
         <Grid alignItems="center" justifyContent="center" container spacing={3} mb={3}>
           <ArgonBox mt={3} px={0.8} sx={{ padding: "5px" }}>

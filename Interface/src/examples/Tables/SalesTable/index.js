@@ -36,9 +36,8 @@ function SalesTable({ title, rows }) {
   const renderTableCells = rows.map((row, key) => {
     const tableRows = [];
     const rowKey = `row-${key}`;
-
-    Object.entries(row).map(([cellTitle, cellContent]) =>
-      Array.isArray(cellContent)
+    Object.entries(row).map(([cellTitle, cellContent]) => {
+      return Array.isArray(cellContent)
         ? tableRows.push(
             <SalesTableCell
               key={cellContent[1]}
@@ -46,6 +45,7 @@ function SalesTable({ title, rows }) {
               content={cellContent[1]}
               image={cellContent[0]}
               noBorder={key === rows.length - 1}
+              isTime={cellTitle === "time"}
             />
           )
         : tableRows.push(
@@ -54,9 +54,10 @@ function SalesTable({ title, rows }) {
               title={cellTitle}
               content={cellContent}
               noBorder={key === rows.length - 1}
+              isTime={cellTitle === "time"}
             />
-          )
-    );
+          );
+    });
 
     return <TableRow key={rowKey}>{tableRows}</TableRow>;
   });
@@ -71,7 +72,7 @@ function SalesTable({ title, rows }) {
             </ArgonTypography>
           </ArgonBox>
         </TableHead>
-        <TableBody>{useMemo(() => renderTableCells, [rows])}</TableBody>
+        <TableBody >{useMemo(() => renderTableCells, [rows])}</TableBody>
       </Table>
     </TableContainer>
   );

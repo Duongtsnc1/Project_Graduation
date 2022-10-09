@@ -1,2 +1,2 @@
-const a = false;
-console.log(Boolean(a))
+const a = true;
+console.log(`change to ${a ? "duong" : "bui"}`);

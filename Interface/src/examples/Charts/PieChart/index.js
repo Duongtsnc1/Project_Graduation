@@ -31,7 +31,7 @@ import ArgonTypography from "components/ArgonTypography";
 // PieChart configurations
 import configs from "examples/Charts/PieChart/configs";
 
-function PieChart({ title, description, height, chart }) {
+function PieChart({ title, description, height, chart, detail }) {
   const { data, options } = configs(chart.labels || [], chart.datasets || {});
 
   const renderChart = (
@@ -58,6 +58,22 @@ function PieChart({ title, description, height, chart }) {
         ),
         [chart, height]
       )}
+      <ArgonBox mt={1}>
+        {Object.keys(detail).map((key) => (
+          <ArgonBox key={key} mt={1} display="flex" justifyContent="space-around">
+            <ArgonBox mt={1} display="flex" flexDirection="row-reverse" flexBasis="30%">
+              <ArgonTypography component="h1" fontWeight="bold" sx={{ color: "#11cdef" }}>
+                {key}
+              </ArgonTypography>
+            </ArgonBox>
+            <ArgonBox mt={1} display="flex" flexBasis="30%">
+              <ArgonTypography component="div" fontWeight="regular" sx={{ color: "black" }}>
+                {detail[key]}
+              </ArgonTypography>
+            </ArgonBox>
+          </ArgonBox>
+        ))}
+      </ArgonBox>
     </ArgonBox>
   );
 
@@ -76,7 +92,8 @@ PieChart.propTypes = {
   title: PropTypes.string,
   description: PropTypes.oneOfType([PropTypes.string, PropTypes.node]),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  chart: PropTypes.objectOf(PropTypes.oneOfType([PropTypes.array, PropTypes.object])).isRequired,
+  chart: PropTypes.objectOf(PropTypes.oneOfType([PropTypes.array, PropTypes.object])),
+  detail: PropTypes.any,
 };
 
 export default PieChart;

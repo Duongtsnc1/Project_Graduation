@@ -25,7 +25,7 @@ const FilterSensors = ({ sensors, onChangeFilter }) => {
   };
 
   return (
-    <ArgonBox pr={1}>
+    <ArgonBox pr={1} >
       <ArgonButton variant="text" color="primary" onClick={handleClickFilter}>
         Show/Hide sensor {Boolean(anchorEl) ? <KeyboardArrowUp /> : <KeyboardArrowDown />}
       </ArgonButton>

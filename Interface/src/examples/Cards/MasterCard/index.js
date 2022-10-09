@@ -98,7 +98,7 @@ function MasterCard({ color, number, holder, expires }) {
               </ArgonTypography>
             </ArgonBox>
           </ArgonBox>
-          <ArgonBox display="flex" justifyContent="flex-end" width="20%">
+          <ArgonBox display="flex" justifyContent="end" width="20%">
             <ArgonBox component="img" src={masterCardLogo} alt="master card" width="60%" mt={1} />
           </ArgonBox>
         </ArgonBox>
