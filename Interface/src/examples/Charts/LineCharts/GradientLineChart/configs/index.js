@@ -1,23 +1,26 @@
-function configs(type = "sensor", threshold = 0) {
-  // const annotation =
-  //   threshold && type === "error"
-  //     ? {
-  //         annotations: [
-  //           {
-  //             type: "line",
-  //             mode: "horizontal",
-  //             scaleID: "y-axis-0",
-  //             value: threshold,
-  //             borderColor: "rgb(75, 192, 192)",
-  //             borderWidth: 4,
-  //             label: {
-  //               enabled: true,
-  //               content: "Threshold",
-  //             },
-  //           },
-  //         ],
-  //       }
-  //     : null;
+function configs(type = "sensor") {
+  const annotation =
+    type === "error"
+      ? {
+          annotations: {
+            line1: {
+              type: "line",
+              scaleID: "y",
+              mode: "horizontal",
+              borderColor: "#fca103",
+              value:0,
+              borderWidth: 1,
+              label: {
+                color: "red",
+                backgroundColor:"transparent",
+                content: "Threshold",
+                display: true,
+                position:"end"
+              },
+            },
+          },
+        }
+      : null;
   const datasets =
     type === "sensor"
       ? [
@@ -65,6 +68,7 @@ function configs(type = "sensor", threshold = 0) {
         legend: {
           display: false,
         },
+        annotation,
       },
       scales: {
         x: {

@@ -17,7 +17,7 @@ import salesTableData from "layouts/dashboard/data/salesTableData";
 import sensorDatas from "layouts/dashboard/data/sensorDatas";
 
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo, useLayoutEffect } from "react";
 import useWebSocket from "react-use-websocket";
 import FilterSensors from "./components/FilterSensors.js";
 import ArgonButton from "components/ArgonButton/index.js";
@@ -28,6 +28,7 @@ function Default() {
   const navigate = useNavigate();
   const [sensors, setSensors] = useState(sensorDatas.sensors);
   const [mode, setMode] = useState(true);
+  const [duong, setDuong] = useState(true);
   const [rawData, setRawData] = useState([]);
   const [scaledData, setScaledData] = useState([]);
 
@@ -37,14 +38,13 @@ function Default() {
   );
   const sensorRef = Array.from({ length: 59 }, () => useRef(null));
   const errorRef = useRef(null);
-  const [threshold, setThreshold] = useState(0);
 
   const getLastpoint = useCallback((oldArray, newValue, maxPoint = 80) => {
     oldArray.length >= maxPoint && oldArray.shift();
     return [...oldArray, newValue];
   }, []);
 
-  const resetSensor = () => {
+  const renderData = () => {
     sensorRef.map((sensor) => {
       if (sensor.current) {
         sensor.current.data.datasets[0].data = [];
@@ -52,27 +52,7 @@ function Default() {
         sensor.current.update();
       }
     });
-  };
-
-  const updateSensor = () => {
-    sensorRef.map((sensor) => {
-      if (sensor.current) sensor.current.update();
-    });
-  };
-
-  const insertData = () => {
     if (mode) {
-      scaledData.map((value) => {
-        value.point_scaled.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
-        });
-        value.point_predicted.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
-        });
-      });
-    } else {
       rawData.map((value) => {
         value.data.map((item, index) => {
           sensorRef[index].current &&
@@ -83,13 +63,21 @@ function Default() {
             sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
         });
       });
+    } else {
+      scaledData.map((value) => {
+        value.point_scaled.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+        });
+        value.point_predicted.map((item, index) => {
+          sensorRef[index].current &&
+            sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
+        });
+      });
     }
-  };
-  const renderData = () => {
-    console.log("renderData");
-    resetSensor();
-    insertData();
-    updateSensor();
+    sensorRef.map((sensor) => {
+      if (sensor.current) sensor.current.update();
+    });
   };
 
   // const { sendJsonMessage, getWebSocket } = useWebSocket("ws://192.168.202.23:8011/", {
@@ -122,21 +110,23 @@ function Default() {
 
       if (mode) {
         point_scaled.map((item, index) => {
-          sensorRef[index].current &&
+          if (sensorRef[index].current) {
             sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
-        });
-        point_predicted.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[1].data.push({ x: Date.now(), y: item });
+            sensorRef[index].current.data.datasets[1].data.push({
+              x: Date.now(),
+              y: point_predicted[index],
+            });
+          }
         });
       } else {
         data.map((item, index) => {
-          sensorRef[index].current &&
+          if (sensorRef[index].current) {
             sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
-        });
-        predicted_data.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[1].data.push({ x: Date.now(), y: item });
+            sensorRef[index].current.data.datasets[1].data.push({
+              x: Date.now(),
+              y: predicted_data[index],
+            });
+          }
         });
       }
 
@@ -147,6 +137,9 @@ function Default() {
           anomaly ? "#ff3333" : "#3d15b0"
         );
         errorRef.current.data.datasets[0].pointBorderColor.push(anomaly ? "#ff3333" : "#3d15b0");
+        errorRef.current.options.plugins.annotation.annotations.line1.value = Number(threshold);
+        errorRef.current.options.plugins.annotation.annotations.line1.label.content =
+          "Threshold " + Number(threshold);
         errorRef.current.update();
       }
     },
@@ -177,19 +170,27 @@ function Default() {
     return result;
   }, [id, sensors]);
 
-  const handlePageChange = (event, value) => {
-    if (value !== Number(id)) {
-      renderData();
-      setId(Number(id));
-    }
-  };
-
   // console.log("Rerender Dashboard", Date.now())F
 
   const hanldeChangeMode = () => {
     renderData();
     setMode(!mode);
   };
+
+  const handlePageChange = (event, value) => {
+    if (value !== Number(id)) {
+      // hanldeChangeMode();
+      setId(Number(value));
+    }
+  };
+  useEffect(() => {
+    setDuong(!duong);
+  }, [renderCharSensors]);
+
+  useEffect(() => {
+    renderData();
+  }, [duong]);
+
   return (
     <DashboardLayout>
       <DashboardNavbar />

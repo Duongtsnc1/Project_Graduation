@@ -17,7 +17,9 @@ import {
   Legend,
   TimeSeriesScale,
 } from "chart.js";
+import annotationPlugin from "chartjs-plugin-annotation";
 import { RealTimeScale, StreamingPlugin } from "chartjs-plugin-streaming";
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -29,7 +31,8 @@ ChartJS.register(
   Title,
   StreamingPlugin,
   Tooltip,
-  Legend
+  Legend,
+  annotationPlugin
 );
 
 // @mui material components
