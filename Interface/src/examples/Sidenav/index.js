@@ -50,7 +50,7 @@ function Sidenav({ color, brand, brandName, routes, ...rest }) {
   const itemName = pathname.split("/").slice(1)[0];
 
   const closeSidenav = () => setMiniSidenav(dispatch, true);
-
+  
   useEffect(() => {
     // A function that sets the mini state of the sidenav.
     function handleMiniSidenav() {

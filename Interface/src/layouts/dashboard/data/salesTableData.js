@@ -17,37 +17,38 @@ Coded by www.creative-tim.com
 import moment from "moment";
 import sensorDatas from "layouts/dashboard/data/sensorDatas";
 
-const data = sensorDatas.sensors.reduce((result, value, index) => {
-  {
-    result[value.title] = Math.random() * 105 + 1;
-    return result;
-  }
-}, {});
+const data = () =>
+  sensorDatas.sensors.reduce((result, value, index) => {
+    {
+      result[value.title] = Math.random() * 105 + 1;
+      return result;
+    }
+  }, {});
 const salesTableData = [
   {
     time: moment(Date.now()).format("DD/MM/yyyy HH:mm:ss"),
-    error: 0.912342321452,
-    ...data,
+    error: Math.random(),
+    ...data(),
   },
   {
-    time: moment(Date.now()).format("DD/MM/yyyy HH:mm:ss"),
-    error: 0.912342321452,
-    ...data,
+    time: moment(Date.now()).add(1,"minute").format("DD/MM/yyyy HH:mm:ss"),
+    error: Math.random(),
+    ...data(),
   },
   {
-    time: moment(Date.now()).format("DD/MM/yyyy HH:mm:ss"),
-    error: 0.912342321452,
-    ...data,
+    time: moment(Date.now()).add(1,"hour").format("DD/MM/yyyy HH:mm:ss"),
+    error: Math.random(),
+    ...data(),
   },
   {
-    time: moment(Date.now()).format("DD/MM/yyyy HH:mm:ss"),
-    error: 0.912342321452,
-    ...data,
+    time: moment(Date.now()).add(1,"day").format("DD/MM/yyyy HH:mm:ss"),
+    error: Math.random(),
+    ...data(),
   },
   {
-    time: moment(Date.now()).format("DD/MM/yyyy HH:mm:ss"),
-    error: 0.912342321452,
-    ...data,
+    time: moment(Date.now()).add(1,"month").format("DD/MM/yyyy HH:mm:ss"),
+    error: Math.random(),
+    ...data(),
   },
 ];
 

@@ -61,6 +61,7 @@ function DashboardLayout({ bgColor, children, ...rest }) {
         left={0}
         sx={darkMode && { bgColor: ({ palette: { background } }) => background.default }}
         {...rest}
+        zIndex={-1}
       />
       {children}
     </ArgonBox>

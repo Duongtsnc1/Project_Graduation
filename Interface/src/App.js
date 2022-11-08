@@ -139,7 +139,7 @@ export default function App() {
       </Icon>
     </ArgonBox>
   );
-
+  console.log(layout);
   return direction === "rtl" ? (
     <CacheProvider value={rtlCache}>
       <ThemeProvider theme={darkMode ? themeDarkRTL : themeRTL}>
@@ -154,8 +154,8 @@ export default function App() {
               onMouseEnter={handleOnMouseEnter}
               onMouseLeave={handleOnMouseLeave}
             /> */}
-            <Configurator />
-            {configsButton}
+            {/* <Configurator /> */}
+            {/* {configsButton} */}
           </>
         )}
         {layout === "vr" && <Configurator />}
@@ -178,8 +178,8 @@ export default function App() {
             onMouseEnter={handleOnMouseEnter}
             onMouseLeave={handleOnMouseLeave}
           /> */}
-          <Configurator />
-          {configsButton}
+          {/* <Configurator />
+          {configsButton} */}
         </>
       )}
       {layout === "vr" && <Configurator />}

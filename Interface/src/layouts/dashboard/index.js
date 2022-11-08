@@ -22,6 +22,7 @@ import useWebSocket from "react-use-websocket";
 import FilterSensors from "./components/FilterSensors.js";
 import ArgonButton from "components/ArgonButton/index.js";
 import { render } from "@testing-library/react";
+import moment from "moment";
 
 function Default() {
   const [id, setId] = useState(1);
@@ -31,6 +32,7 @@ function Default() {
   const [duong, setDuong] = useState(true);
   const [rawData, setRawData] = useState([]);
   const [scaledData, setScaledData] = useState([]);
+  // const [anomalyLogs, setAnomalyLogs] = useState([]);
 
   const count = useMemo(
     () => Math.ceil(sensors.filter((item) => item.show).length / 8),
@@ -44,87 +46,92 @@ function Default() {
     return [...oldArray, newValue];
   }, []);
 
-  const renderData = () => {
+  const renderData = useCallback(() => {
     sensorRef.map((sensor) => {
       if (sensor.current) {
         sensor.current.data.datasets[0].data = [];
         sensor.current.data.datasets[1].data = [];
-        sensor.current.update();
+        // sensor.current.update();
       }
     });
-    if (mode) {
-      rawData.map((value) => {
-        value.data.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+    if (!mode) {
+      rawData.length &&
+        rawData.map((value) => {
+          value.data.map((item, index) => {
+            sensorRef[index].current &&
+              sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+          });
+          value.point_predicted.map((item, index) => {
+            sensorRef[index].current &&
+              sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
+          });
         });
-        value.predicted_data.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
-        });
-      });
     } else {
-      scaledData.map((value) => {
-        value.point_scaled.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+      scaledData.length &&
+        scaledData.map((value) => {
+          value.point_scaled.map((item, index) => {
+            sensorRef[index].current &&
+              sensorRef[index].current.data.datasets[0].data.push({ x: value.time, y: item });
+          });
+          value.point_scaled_predicted.map((item, index) => {
+            sensorRef[index].current &&
+              sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
+          });
         });
-        value.point_predicted.map((item, index) => {
-          sensorRef[index].current &&
-            sensorRef[index].current.data.datasets[1].data.push({ x: value.time, y: item });
-        });
-      });
     }
     sensorRef.map((sensor) => {
       if (sensor.current) sensor.current.update();
     });
-  };
+  }, [mode, scaledData, rawData]);
 
-  // const { sendJsonMessage, getWebSocket } = useWebSocket("ws://192.168.202.23:8011/", {
+  // const { sendJsonMessage, getWebSocket } = useWebSocket("ws://192.168.180.23:8012/", {
   const { sendJsonMessage, getWebSocket } = useWebSocket("ws://127.0.0.1:8888/", {
     onOpen: () => console.log("WebSocket connection opened."),
     onClose: () => console.log("WebSocket connection closed."),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
       const dataSocket = JSON.parse(event.data);
-      const { data, datetime, label, predict = {}, predicted_data } = dataSocket[0];
+      // console.log(dataSocket)
+      const { data, datetime, label, predict = {} } = dataSocket[0];
 
       let {
         anomaly = false,
         point_scaled = null,
-        point_predicted = null,
+        point_scaled_predicted = null,
         score_error = null,
         threshold = 0,
+        point_predicted,
       } = predict;
 
-      let newData = getLastpoint([...rawData], { data, predicted_data, time: Date.now() }, 80);
+      let newData = getLastpoint([...rawData], { data, point_predicted, time: Date.now() }, 80);
       setRawData(newData);
-      if (point_predicted) {
+      if (point_scaled_predicted) {
         let newData = getLastpoint(
           [...scaledData],
-          { point_scaled, point_predicted, time: Date.now() },
+          { point_scaled, point_scaled_predicted, time: Date.now() },
           80
         );
         setScaledData(newData);
       }
 
       if (mode) {
-        point_scaled.map((item, index) => {
-          if (sensorRef[index].current) {
-            sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
-            sensorRef[index].current.data.datasets[1].data.push({
-              x: Date.now(),
-              y: point_predicted[index],
-            });
-          }
-        });
+        point_scaled &&
+          point_scaled.map((item, index) => {
+            if (sensorRef[index].current) {
+              sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
+              sensorRef[index].current.data.datasets[1].data.push({
+                x: Date.now(),
+                y: point_scaled_predicted[index],
+              });
+            }
+          });
       } else {
         data.map((item, index) => {
           if (sensorRef[index].current) {
             sensorRef[index].current.data.datasets[0].data.push({ x: Date.now(), y: item });
             sensorRef[index].current.data.datasets[1].data.push({
               x: Date.now(),
-              y: predicted_data[index],
+              y: point_predicted[index],
             });
           }
         });
@@ -142,9 +149,20 @@ function Default() {
           "Threshold " + Number(threshold);
         errorRef.current.update();
       }
+
+      if (anomaly) {
+        // let valueAtAnomaly = data.reduce((result, value, index) => {
+        //   result[sensorDatas.sensors[index].title] = value;
+        //   return result;
+        // }, {});
+        // let newLog = {
+        //   error: score_error,
+        //   time: moment(Date.now()).format("DD/MM/yyyy HH:mm:ss"),
+        // };
+        // setAnomalyLogs([newLog, ...anomalyLogs]);
+      }
     },
   });
-
   const renderCharSensors = useMemo(() => {
     let i = 4 * (id - 1) * 2;
     let showSensors = sensors.filter((item) => item.show);
@@ -173,13 +191,13 @@ function Default() {
   // console.log("Rerender Dashboard", Date.now())F
 
   const hanldeChangeMode = () => {
-    renderData();
+    // renderData();
     setMode(!mode);
   };
 
   const handlePageChange = (event, value) => {
     if (value !== Number(id)) {
-      // hanldeChangeMode();
+      // renderData();
       setId(Number(value));
     }
   };
@@ -189,7 +207,7 @@ function Default() {
 
   useEffect(() => {
     renderData();
-  }, [duong]);
+  }, [duong, id, mode]);
 
   return (
     <DashboardLayout>
@@ -258,11 +276,16 @@ function Default() {
             />
           </ArgonBox>
         </Grid>
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={12}>
-            <SalesTable title="Anomaly logs" rows={salesTableData} />
-          </Grid>
-        </Grid>
+        {/* {useMemo(
+          () => (
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={12}>
+                <SalesTable title="Anomaly logs" rows={anomalyLogs} />
+              </Grid>
+            </Grid>
+          ),
+          [anomalyLogs]
+        )} */}
       </ArgonBox>
       {/* <ArgonBox py={3}></ArgonBox> */}
       <Footer />

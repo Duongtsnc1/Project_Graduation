@@ -40,6 +40,7 @@ import Billing from "layouts/billing";
 import VirtualReality from "layouts/virtual-reality";
 import RTL from "layouts/rtl";
 import DataDetail from "layouts/dataDetail";
+import AnomalyLogs from "layouts/anomalylogs";
 // Argon Dashboard 2 MUI components
 import ArgonBox from "components/ArgonBox";
 
@@ -64,6 +65,16 @@ const routes = [
       <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
     ),
     component: <DataDetail />,
+  },
+  {
+    type: "route",
+    name: "Logs",
+    key: "Logs",
+    route: "/logs",
+    icon: (
+      <ArgonBox component="i" color="warning" fontSize="14px" className="ni ni-calendar-grid-58" />
+    ),
+    component: <AnomalyLogs />,
   },
   {
     type: "route",

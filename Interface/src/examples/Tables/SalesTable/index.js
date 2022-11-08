@@ -1,18 +1,3 @@
-/**
-=========================================================
-* Argon Dashboard 2 MUI - v3.0.0
-=========================================================
-
-* Product Page: https://www.creative-tim.com/product/argon-dashboard-material-ui
-* Copyright 2022 Creative Tim (https://www.creative-tim.com)
-
-Coded by www.creative-tim.com
-
- =========================================================
-
-* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-*/
-
 import { useMemo } from "react";
 
 // prop-types is a library for typechecking of props
@@ -28,9 +13,13 @@ import TableRow from "@mui/material/TableRow";
 // Argon Dashboard 2 MUI components
 import ArgonTypography from "components/ArgonTypography";
 import ArgonBox from "components/ArgonBox";
+import { nanoid } from "nanoid";
 
 // Argon Dashboard 2 MUI example components
 import SalesTableCell from "examples/Tables/SalesTable/SalesTableCell";
+
+import axios from "axios";
+import { NoAccountsOutlined } from "@mui/icons-material";
 
 function SalesTable({ title, rows }) {
   const renderTableCells = rows.map((row, key) => {
@@ -40,7 +29,7 @@ function SalesTable({ title, rows }) {
       return Array.isArray(cellContent)
         ? tableRows.push(
             <SalesTableCell
-              key={cellContent[1]}
+              key={1}
               title={cellTitle}
               content={cellContent[1]}
               image={cellContent[0]}
@@ -50,7 +39,7 @@ function SalesTable({ title, rows }) {
           )
         : tableRows.push(
             <SalesTableCell
-              key={cellContent}
+              key={Math.random() + "" + Date.now() + "" + cellContent}
               title={cellTitle}
               content={cellContent}
               noBorder={key === rows.length - 1}
@@ -61,9 +50,8 @@ function SalesTable({ title, rows }) {
 
     return <TableRow key={rowKey}>{tableRows}</TableRow>;
   });
-
   return (
-    <TableContainer sx={{ height: "100%" }}>
+    <TableContainer sx={{ height: "100%", maxHeight: "419px", overflow: "scroll" }}>
       <Table>
         <TableHead>
           <ArgonBox component="tr" width="max-content" display="block" mb={1.5}>
@@ -72,7 +60,7 @@ function SalesTable({ title, rows }) {
             </ArgonTypography>
           </ArgonBox>
         </TableHead>
-        <TableBody >{useMemo(() => renderTableCells, [rows])}</TableBody>
+        <TableBody>{useMemo(() => renderTableCells, [rows])}</TableBody>
       </Table>
     </TableContainer>
   );
