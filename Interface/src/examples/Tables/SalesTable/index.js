@@ -21,7 +21,7 @@ import SalesTableCell from "examples/Tables/SalesTable/SalesTableCell";
 import axios from "axios";
 import { NoAccountsOutlined } from "@mui/icons-material";
 
-function SalesTable({ title, rows }) {
+function SalesTable({ title, rows , maxHeight}) {
   const renderTableCells = rows.map((row, key) => {
     const tableRows = [];
     const rowKey = `row-${key}`;
@@ -51,7 +51,7 @@ function SalesTable({ title, rows }) {
     return <TableRow key={rowKey}>{tableRows}</TableRow>;
   });
   return (
-    <TableContainer sx={{ height: "100%", maxHeight: "419px", overflow: "scroll" }}>
+    <TableContainer sx={{ height: "100%", maxHeight: maxHeight, overflow: "scroll" }}>
       <Table>
         <TableHead>
           <ArgonBox component="tr" width="max-content" display="block" mb={1.5}>
@@ -75,6 +75,7 @@ SalesTable.defaultProps = {
 SalesTable.propTypes = {
   title: PropTypes.string.isRequired,
   rows: PropTypes.arrayOf(PropTypes.object),
+  maxHeight: PropTypes.any,
 };
 
 export default SalesTable;

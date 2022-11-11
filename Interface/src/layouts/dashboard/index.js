@@ -84,15 +84,26 @@ function Default() {
     });
   }, [mode, scaledData, rawData]);
 
-  // const { sendJsonMessage, getWebSocket } = useWebSocket("ws://192.168.180.23:8012/", {
-  const { sendJsonMessage, getWebSocket } = useWebSocket("ws://127.0.0.1:8888/", {
+  const filterdata = useCallback((array) => {
+    const filterIndex = [0, 2, 3, 4, 10, 11, 13, 21, 24, 25, 26, 27, 32, 33, 34, 35, 37, 45, 46, 51, 56, 57]
+    filterIndex.reverse()
+    filterIndex.map((value) => {
+      let temp = array[value]
+      array.splice(value, 1)
+      array.push(temp)
+    })
+    return array
+  }, [])
+
+  const { sendJsonMessage, getWebSocket } = useWebSocket("ws://192.168.46.23:8013/", {
+    // const { sendJsonMessage, getWebSocket } = useWebSocket("ws://127.0.0.1:8888/", {
     onOpen: () => console.log("WebSocket connection opened."),
     onClose: () => console.log("WebSocket connection closed."),
     shouldReconnect: (closeEvent) => true,
     onMessage: (event) => {
       const dataSocket = JSON.parse(event.data);
       // console.log(dataSocket)
-      const { data, datetime, label, predict = {} } = dataSocket[0];
+      let { data, datetime, label, predict = {} } = dataSocket[0];
 
       let {
         anomaly = false,
@@ -102,7 +113,10 @@ function Default() {
         threshold = 0,
         point_predicted,
       } = predict;
-
+      data = filterdata(data)
+      point_predicted = filterdata(point_predicted)
+      if (point_scaled) point_scaled = filterdata(point_scaled)
+      if (point_scaled_predicted) point_scaled_predicted = filterdata(point_scaled_predicted)
       let newData = getLastpoint([...rawData], { data, point_predicted, time: Date.now() }, 80);
       setRawData(newData);
       if (point_scaled_predicted) {
@@ -223,7 +237,7 @@ function Default() {
                   lineHeight={"40%"}
                   ref={errorRef}
                   type="error"
-                  // threshold={threshold}
+                // threshold={threshold}
                 />
               </Grid>
             </Grid>
@@ -233,7 +247,7 @@ function Default() {
 
         <Grid display="flex" alignItems="center" justifyContent={"space-between"} mb={3}>
           <ArgonBox spacing={1}>
-            <ArgonBox pr={1}>
+            <ArgonBox pr={1} display="flex">
               <ArgonButton
                 color="primary"
                 variant="gradient"
@@ -242,6 +256,16 @@ function Default() {
               >
                 {`Switch to ${mode ? "Raw data" : "Scaled data"}`}
               </ArgonButton>
+
+              <div style={{ padding: "5px", display: "flex", justifyContent: "center", alignItems: "center",marginLeft:"20px" }}>
+                <div style={{ width: "25px", height: "10px", backgroundColor: "#11cdef",marginRight:"10px" }}></div>
+                <div style={{ fontSize: "15px" }}>Actual data</div>
+              </div>
+              <div style={{ padding: "5px", display: "flex", justifyContent: "center", alignItems: "center",marginLeft:"20px" }}>
+                <div style={{ width: "25px", height: "10px", backgroundColor: "#06cc7d",marginRight:"10px" }}></div>
+                <div style={{ fontSize: "15px" }}>Predicted data</div>
+              </div>
+
             </ArgonBox>
           </ArgonBox>
           {useMemo(

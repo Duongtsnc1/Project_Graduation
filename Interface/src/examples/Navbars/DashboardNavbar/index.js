@@ -137,7 +137,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               <ArgonTypography
                 variant="button"
                 fontWeight="medium"
-                color={light && transparentNavbar ? "white" : "dark"}
+                color={route.indexOf("dashboard") ===-1? "white" : "dark"}
                 fontSize="15px"
               >
                 Dashboard
@@ -160,7 +160,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               <ArgonTypography
                 variant="button"
                 fontWeight="medium"
-                color={light && transparentNavbar ? "white" : "dark"}
+                color={route.indexOf("logs") ===-1 ? "white" : "dark"}
                 fontSize="15px"
               >
                 AnomalyLogs
@@ -183,7 +183,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               <ArgonTypography
                 variant="button"
                 fontWeight="medium"
-                color={light && transparentNavbar ? "white" : "dark"}
+                color={route.indexOf("datadetail") ===-1 ? "white" : "dark"}
                 fontSize="15px"
               >
                 Datadetail
@@ -218,7 +218,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
             >
               <Icon>{miniSidenav ? "menu_open" : "menu"}</Icon>
             </IconButton>
-            <IconButton
+            {/* <IconButton
               size="small"
               color={light && transparentNavbar ? "white" : "dark"}
               sx={navbarIconButton}
@@ -228,7 +228,7 @@ function DashboardNavbar({ absolute, light, isMini }) {
               onClick={handleOpenMenu}
             >
               <Icon>notifications</Icon>
-            </IconButton>
+            </IconButton> */}
             {renderMenu()}
           </ArgonBox>
         </ArgonBox>
